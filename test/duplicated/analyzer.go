@@ -6,6 +6,6 @@ import (
 )
 
 func Something() {
-	analyzer := analyzer.NewGoImportsAnalyzer("github.com/martinsaporiti/goimportsorder")
+	analyzer := analyzer.Analyzer
 	singlechecker.Main(analyzer)
 }

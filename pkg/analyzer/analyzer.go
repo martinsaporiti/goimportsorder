@@ -9,27 +9,25 @@ import (
 	"golang.org/x/tools/go/ast/inspector"
 )
 
-type GoImportsAnalyzer struct {
-	pattern  string
-	Analyzer *analysis.Analyzer
-}
-
-func NewGoImportsAnalyzer(pattern string) *analysis.Analyzer {
-	a := &GoImportsAnalyzer{
-		pattern: pattern,
-	}
-
-	return &analysis.Analyzer{
+var (
+	Analyzer = &analysis.Analyzer{
 		Name:             "goimportsorder",
 		Doc:              "Checks that imports are not mixed with company imports",
 		RunDespiteErrors: true,
-		Run:              a.run,
+		Run:              run,
 		Requires:         []*analysis.Analyzer{inspect.Analyzer},
 	}
 
+	pattern string
+)
+
+func init() {
+	if pattern == "" {
+		Analyzer.Flags.StringVar(&pattern, "pattern", "", "pattern to match")
+	}
 }
 
-func (a *GoImportsAnalyzer) run(pass *analysis.Pass) (interface{}, error) {
+func run(pass *analysis.Pass) (interface{}, error) {
 
 	inspector := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
 
@@ -44,11 +42,11 @@ func (a *GoImportsAnalyzer) run(pass *analysis.Pass) (interface{}, error) {
 		}
 		shouldBeBusinessImport := false
 		for _, imp := range fileSpec.Imports {
-			if strings.Contains(imp.Path.Value, a.pattern) && !shouldBeBusinessImport {
+			if strings.Contains(imp.Path.Value, pattern) && !shouldBeBusinessImport {
 				shouldBeBusinessImport = true
 				continue
 			}
-			if !strings.Contains(imp.Path.Value, a.pattern) && shouldBeBusinessImport {
+			if !strings.Contains(imp.Path.Value, pattern) && shouldBeBusinessImport {
 				pass.Reportf(imp.Pos(), "goimportsorder: import %s is not allowed", imp.Path.Value)
 				return
 			}

@@ -7,7 +7,7 @@ import (
 )
 
 func Something1() {
-	analyzer := analyzer.NewGoImportsAnalyzer("github.com/martinsaporiti/goimportsorder")
+	analyzer := analyzer.Analyzer
 	singlechecker.Main(analyzer)
 
 }
